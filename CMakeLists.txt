@@ -3,4 +3,11 @@ project(EconoVault)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(EconoVault main.cpp)
+add_executable(EconoVault main.cpp
+        Transaction.cpp
+        Transaction.h
+        TransactionType.cpp
+        TransactionType.h
+        PlannedTransaction.cpp
+        PlannedTransaction.h
+)
