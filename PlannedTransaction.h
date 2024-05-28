@@ -12,6 +12,8 @@ class PlannedTransaction : public Transaction {
 public:
     explicit PlannedTransaction(float amount);
 
+    virtual PlannedTransaction &operator=(const PlannedTransaction &right);
+
 private:
     int date;
 

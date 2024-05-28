@@ -10,4 +10,8 @@ add_executable(EconoVault main.cpp
         TransactionType.h
         PlannedTransaction.cpp
         PlannedTransaction.h
+        TransactionFlow.cpp
+        TransactionFlow.h
+        Time.cpp
+        Time.h
 )
