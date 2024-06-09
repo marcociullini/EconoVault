@@ -3,12 +3,24 @@
 //
 
 #include <ctime>
+#include <iostream>
 #include "Time.h"
 
-std::string Time::getTime() {
+std::string Time::printCurrentTime() const {
     time_t rawTime;
     std::time(&rawTime);
     struct tm *rawTimeA;
     rawTimeA = localtime(&rawTime);
     return asctime(rawTimeA);
+}
+void Time::printTime() const{
+    std::cout << time << std::endl;
+}
+
+void Time::setTime(){
+    time_t rawTime;
+    std::time(&rawTime);
+    struct tm *rawTimeA;
+    rawTimeA = localtime(&rawTime);
+    this->time = asctime(rawTimeA);
 }

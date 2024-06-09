@@ -6,12 +6,18 @@ set(CMAKE_CXX_STANDARD 11)
 add_executable(EconoVault main.cpp
         Transaction.cpp
         Transaction.h
-        TransactionType.cpp
-        TransactionType.h
         PlannedTransaction.cpp
         PlannedTransaction.h
         TransactionFlow.cpp
         TransactionFlow.h
         Time.cpp
         Time.h
+        BankAccount.cpp
+        BankAccount.h
+        PaymentCard.cpp
+        PaymentCard.h
+        CreditCard.cpp
+        CreditCard.h
+        DebitCard.cpp
+        DebitCard.h
 )

@@ -9,31 +9,58 @@
 #include <string>
 #include <ctime>
 #include <iostream>
-#include "TransactionType.h"
+#include "Time.h"
+
+enum class TransactionType {
+    Deposit, Withdrawal, Transfer
+};
 
 class Transaction {
 public:
-    explicit Transaction(float amount);
+    explicit Transaction(float a, TransactionType type);
 
-    //FIXME destructor that deletes type that is a TransactionType pointer
+    ~Transaction();
 
     virtual Transaction &operator=(const Transaction &right);
 
-    std::string getdateTime() const {
+    virtual void printTransaction() const;
+
+    std::string printTransactionString();
+
+    std::string printTransactionType() const;
+
+    static std::string printTransactionTypes();
+
+    std::string printDateTime() const;
+
+    float getAmount() const {
+        return amount;
+    }
+
+    void setAmount(float amount) {
+        this->amount = amount;
+    }
+
+    const Time &getDateTime() const {
         return dateTime;
     }
 
-    virtual void printTransaction() const {
-        std::cout
-                << "Transaction: "  /*/ << FIXME use printTransactionType() per transactionType */ /*/ << FIXME use usa printFlow() per flow */
-                << ", amount: " << amount << ", time info: " << dateTime << std::endl;
+    void setDateTime() {
+        this->dateTime;
+    }
+
+    TransactionType getType() const {
+        return type;
+    }
+
+    void setType(TransactionType type) {
+        this->type = type;
     }
 
 protected:
     float amount;
-    std::string dateTime;
-    //FIXME TransactionType* type;
-    //FIXME transactionFlow flow;
+    Time dateTime;
+    TransactionType type;
 };
 
 

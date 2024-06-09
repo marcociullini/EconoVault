@@ -10,9 +10,18 @@
 
 class Time {
 public:
-    std::string getTime();
+    std::string printCurrentTime() const;
 
+    void printTime() const;
+
+    void setTime();
+
+    std::string getTime() const{
+        return time;
+    }
+
+private:
+    std::string time;
 };
-
 
 #endif //ECONOVAULT_TIME_H

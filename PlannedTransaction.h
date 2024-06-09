@@ -10,7 +10,7 @@
 
 class PlannedTransaction : public Transaction {
 public:
-    explicit PlannedTransaction(float amount);
+    explicit PlannedTransaction(float amount, TransactionType type);
 
     virtual PlannedTransaction &operator=(const PlannedTransaction &right);
 
