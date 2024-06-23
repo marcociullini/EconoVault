@@ -3,41 +3,43 @@
 //
 
 #include <sstream>
-#include "Transaction.h"
+#include "Operation.h"
 
-Transaction::Transaction(float a, TransactionType type) : amount(a), type(type) {
+Operation::Operation(float a, OperationType type) : amount(a), type(type) {
 
     dateTime.setTime();
 
 }
 
-void Transaction::printTransaction() const {
+Operation::Operation(const Operation &other) : amount(other.amount) , dateTime(other.dateTime) , type(other.type) {}
+
+void Operation::printOperation() const {
     std::cout
-            << printTransactionType() /*/ << FIXME use usa printFlow() per flow */
+            << printOperationType() /*/ << FIXME use usa printFlow() per flow */
             << ", amount:" << amount << ", time info:" << dateTime.getTime() << std::endl;
 }
 
-std::string Transaction::printTransactionString() {
+std::string Operation::printOperationString() const {
     std::stringstream transaction;
-    transaction << printTransactionType() /*/ << FIXME use usa printFlow() per flow */ << ", amount:" << amount
+    transaction << printOperationType() /*/ << FIXME use usa printFlow() per flow */ << ", amount:" << amount
                 << ", time info:" << dateTime.getTime();
     return transaction.str();
 }
 
-std::string Transaction::printTransactionType() const {
+std::string Operation::printOperationType() const {
     switch (type) {
-        case TransactionType::Deposit:
+        case OperationType::Deposit:
             return "Deposit";
-        case TransactionType::Withdrawal:
+        case OperationType::Withdrawal:
             return "Withdrawal";
-        case TransactionType::Transfer:
+        case OperationType::Transfer:
             return "Transfer";
         default:
             return "Unknown";
     }
 }
 
-std::string Transaction::printTransactionTypes() {
+std::string Operation::printOperationTypes() {
     std::stringstream transactionTypes;
     transactionTypes << "1. Deposit" << std::endl;
     transactionTypes << "2. Withdrawal" << std::endl;
@@ -45,11 +47,11 @@ std::string Transaction::printTransactionTypes() {
     return transactionTypes.str();
 }
 
-std::string Transaction::printDateTime() const {
+std::string Operation::printDateTime() const {
     return dateTime.getTime();
 }
 
-Transaction &Transaction::operator=(const Transaction &right) {
+Operation &Operation::operator=(const Operation &right) {
     if (this != &right) {
         amount = right.amount;
         dateTime = right.dateTime;

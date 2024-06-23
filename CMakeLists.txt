@@ -3,21 +3,16 @@ project(EconoVault)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(EconoVault main.cpp
-        Transaction.cpp
-        Transaction.h
-        PlannedTransaction.cpp
-        PlannedTransaction.h
-        TransactionFlow.cpp
-        TransactionFlow.h
-        Time.cpp
-        Time.h
-        BankAccount.cpp
-        BankAccount.h
-        PaymentCard.cpp
-        PaymentCard.h
-        CreditCard.cpp
-        CreditCard.h
-        DebitCard.cpp
-        DebitCard.h
+#aggiunge una cartella nel processo di build
+add_subdirectory(test)
+#settaggio dei file sorgente
+set(SOURCE_FILES Operation.cpp Operation.h PlannedTransaction.cpp PlannedTransaction.h
+        Time.cpp Time.h BankAccount.cpp BankAccount.h PaymentCard.cpp PaymentCard.h CreditCard.cpp
+        CreditCard.h DebitCard.cpp DebitCard.h
 )
+#il nome dell'eseguibile sarà quello del nome progetto e questo eseguibile avrà come file sorgente sarà solamente il main FIXME?
+add_executable(${CMAKE_PROJECT_NAME} main.cpp)
+#aggiunta della libreria con i file sorgente settati a riga 9
+add_library(${CMAKE_PROJECT_NAME}_lib ${SOURCE_FILES})
+#collego la libreria di riga 17 all'eseguibile di riga 13
+target_link_libraries(${CMAKE_PROJECT_NAME} ${CMAKE_PROJECT_NAME}_lib)

@@ -12,13 +12,17 @@ class Time {
 public:
     std::string printCurrentTime() const;
 
+    std::string getUserInputDate();
+
     void printTime() const;
 
     void setTime();
 
-    std::string getTime() const{
+    std::string getTime() const {
         return time;
     }
+
+    std::string formatDate(const std::string &date);
 
 private:
     std::string time;

@@ -15,7 +15,7 @@ class PaymentCard {
 public:
     PaymentCard(std::string name);
 
-    ~PaymentCard();
+    ~PaymentCard() = default;
 
     PaymentCard &operator=(const PaymentCard &right);
 

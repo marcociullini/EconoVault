@@ -1,6 +1,6 @@
 #include <iostream>
 #include "PaymentCard.h"
-#include "Transaction.h"
+#include "Operation.h"
 #include "BankAccount.h"
 
 int main() {
@@ -14,11 +14,11 @@ int main() {
         std::cout << "Select operation to perform:" << std::endl;
         std::cout << "1. New transaction" << std::endl;
         std::cout << "2. Visualize transaction history" << std::endl;
-        std::cout << "3. Share transaction history" << std::endl;
-        std::cout << "4. Card operations" << std::endl;
-        std::cout << "5. exit " << std::endl;
-        /*/std::cout << "5. - " << std::endl;
-        std::cout << "6. - " << std::endl;
+        std::cout << "3. Search transaction" << std::endl;
+        std::cout << "4. Share transaction history" << std::endl;
+        std::cout << "5. Card operations" << std::endl;
+        std::cout << "6. exit " << std::endl;
+        /*/std::cout << "6. - " << std::endl;
         std::cout << "7. - " << std::endl;
         std::cout << "8. - " << std::endl;
         std::cout << "9. - " << std::endl;
@@ -38,25 +38,25 @@ int main() {
                 do {
                     // Chiedi all'utente di selezionare il tipo di transazione
                     std::cout << "Select transaction type:" << std::endl;
-                    std::cout << Transaction::printTransactionTypes();
+                    std::cout << Operation::printOperationTypes();
                     std::cin >> transactionTypeChoice;
                     if (transactionTypeChoice <= 0 || transactionTypeChoice >= 4)
                         std::cerr << "Invalid choice!" << std::endl;
                 } while (transactionTypeChoice <= 0 || transactionTypeChoice >= 4);
 
 
-                TransactionType transactionType;
+                OperationType transactionType;
 
                 // Imposta il tipo di transazione in base alla scelta dell'utente
                 switch (transactionTypeChoice) {
                     case 1:
-                        transactionType = TransactionType::Deposit;
+                        transactionType = OperationType::Deposit;
                         break;
                     case 2:
-                        transactionType = TransactionType::Withdrawal;
+                        transactionType = OperationType::Withdrawal;
                         break;
                     case 3:
-                        transactionType = TransactionType::Transfer;
+                        transactionType = OperationType::Transfer;
                         break;
                         /*/default:
                             std::cerr << "Invalid choice!" << std::endl;
@@ -68,7 +68,7 @@ int main() {
                 std::cin >> amount;
 
                 // Crea un nuovo shared_ptr transaction puntante la transazione creata con i valori inseriti/selezionati dall'utente
-                auto transaction = std::make_shared<Transaction>(amount, transactionType);
+                auto transaction = std::make_shared<Operation>(amount, transactionType);
 
                 // Aggiungi lo shared_ptr transaction al vettore transactions del BankAccount
                 account1->addTransaction(transaction);
@@ -76,21 +76,59 @@ int main() {
                 std::cout << "Done" << std::endl;
 
                 // Stampa la transazione
-                transaction->printTransaction();
+                transaction->printOperation();
 
                 break;
             }
                 //2. Visualize transaction history
             case 2:
-                account1->printOperations();
+                account1->printOperations(account1->getOperations());
+                std::cout << std::endl;
+                account1->printBalance();
+                std::cout << std::endl;
                 break;
-                //3. Share transaction history
+                //3. Search transaction
             case 3:
+                int searchMethodChoice;
+
+                do {
+                    std::cout << "Select search method:" << std::endl;
+                    std::cout << "1. Date Search" << std::endl;
+                    std::cout << "2. Amount search" << std::endl;
+                    std::cin >> searchMethodChoice;
+                } while (searchMethodChoice <= 0 || searchMethodChoice >= 3);
+
+                switch (searchMethodChoice) {
+                    case 1: {
+
+
+                        break;
+                    }
+                    case 2: {
+
+                        float amount;
+
+                        std::cout << "Insert amount:" << std::endl;
+                        std::cin >> amount;
+
+                        if (account1->searchOperationAmount(amount).size() > 0) {
+                            std::cout << "Search result:" << std::endl;
+                            account1->printOperations(account1->searchOperationAmount(amount));
+                        } else {
+                            std::cout << "Search result: -none" << std::endl;
+                        }
+                        break;
+                    }
+                }
+
+
+                break;
+                //4. Share transaction history
+            case 4:
                 account1->save(std::string("history.txt"));
                 break;
-                //4. Card operations
-            case 4: {
-
+                //5. Card operations
+            case 5: {
                 int cardOperationChoice;
                 do {
                     std::cout << "Select operation to perform:" << std::endl;
@@ -120,7 +158,7 @@ int main() {
                         break;
                         /*/default:
                             std::cerr << "Invalid choice. Defaulting to Deposit." << std::endl;
-                            transactionType = TransactionType::Deposit;
+                            transactionType = OperationType::Deposit;
                             break; */
                 }
 
@@ -128,9 +166,7 @@ int main() {
                 break;
 
             }
-                //5. exit
-            case 5:
-                break;
+                //6. exit
             case 6:
                 break;
             case 7:

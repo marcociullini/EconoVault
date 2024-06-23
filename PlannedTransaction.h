@@ -6,11 +6,11 @@
 #define ECONOVAULT_PLANNEDTRANSACTION_H
 
 
-#include "Transaction.h"
+#include "Operation.h"
 
-class PlannedTransaction : public Transaction {
+class PlannedTransaction : public Operation {
 public:
-    explicit PlannedTransaction(float amount, TransactionType type);
+    explicit PlannedTransaction(float amount, OperationType type);
 
     virtual PlannedTransaction &operator=(const PlannedTransaction &right);
 
