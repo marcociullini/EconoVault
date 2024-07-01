@@ -12,7 +12,7 @@ include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 #le prossime righe spiego come si crea l'eseguibile di test
 
 #setto gli elementi tester (i file cpp della cartella di test)
-set(TEST_SOURCE_FILES runAllTests.cpp BankAccountTest.cpp TransactionTest.cpp #FIXME aggiungi i file eseguibili di test!!!
+set(TEST_SOURCE_FILES runAllTests.cpp BankAccountTest.cpp TransactionTest.cpp
 )
 #crea l'eseguibile con i file cpp che contengono i test (riga 14)
 add_executable(runEconoVaultTests ${TEST_SOURCE_FILES})

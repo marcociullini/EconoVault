@@ -15,13 +15,12 @@ Operation::Operation(const Operation &other) : amount(other.amount) , dateTime(o
 
 void Operation::printOperation() const {
     std::cout
-            << printOperationType() /*/ << FIXME use usa printFlow() per flow */
-            << ", amount:" << amount << ", time info:" << dateTime.getTime() << std::endl;
+            << printOperationType() << ", amount:" << amount << ", time info:" << dateTime.getTime() << std::endl;
 }
 
 std::string Operation::printOperationString() const {
     std::stringstream transaction;
-    transaction << printOperationType() /*/ << FIXME use usa printFlow() per flow */ << ", amount:" << amount
+    transaction << printOperationType() << ", amount:" << amount
                 << ", time info:" << dateTime.getTime();
     return transaction.str();
 }

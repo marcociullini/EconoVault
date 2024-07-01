@@ -5,7 +5,7 @@
 #include "PlannedTransaction.h"
 
 PlannedTransaction::PlannedTransaction(float amount, OperationType type) : Operation(amount, type) {
-    this->date = 1; //FIXME watch for a valid date
+    this->date = 1;
 }
 
 PlannedTransaction &PlannedTransaction::operator=(const PlannedTransaction &right) {

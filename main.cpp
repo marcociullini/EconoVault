@@ -101,7 +101,17 @@ int main() {
                 switch (searchMethodChoice) {
                     case 1: {
 
+                        Time date;
 
+                        date.getUserInputDate();
+
+                        if (account1->searchOperationDate(date.getTime()).size() > 0) {
+                            std::cout << "Search result:" << std::endl;
+                            account1->printOperations(account1->searchOperationDate(date.getTime()));
+                        } else {
+                            std::cout << "Search result:" << std::endl;
+                            std::cout << "-none" << std::endl;
+                        }
                         break;
                     }
                     case 2: {

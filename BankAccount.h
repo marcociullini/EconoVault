@@ -38,11 +38,11 @@ public:
 
     void addTransaction(const std::shared_ptr<Operation> &transaction);
 
-    bool sameAmount(float a, float b) const;
+    bool static sameAmount(float a, float b);
 
     std::vector<std::shared_ptr<Operation>> searchOperationAmount(float amount) const;
 
-    std::vector<std::shared_ptr<Operation>> searchOperationDate() const;
+    std::vector<std::shared_ptr<Operation>> searchOperationDate(std::string date) const;
 
     void save(std::string file) const;
 
@@ -62,7 +62,6 @@ private:
     std::list<std::shared_ptr<PaymentCard>> paymentCards;
     std::string IBAN;
     float balance;
-    //FIXME add overdraft?
 
 };
 

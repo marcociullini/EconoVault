@@ -9,8 +9,10 @@ add_subdirectory(test)
 set(SOURCE_FILES Operation.cpp Operation.h PlannedTransaction.cpp PlannedTransaction.h
         Time.cpp Time.h BankAccount.cpp BankAccount.h PaymentCard.cpp PaymentCard.h CreditCard.cpp
         CreditCard.h DebitCard.cpp DebitCard.h
+        Date.cpp
+        Date.h
 )
-#il nome dell'eseguibile sarà quello del nome progetto e questo eseguibile avrà come file sorgente sarà solamente il main FIXME?
+#il nome dell'eseguibile sarà quello del nome progetto e questo eseguibile avrà come file sorgente sarà solamente il main
 add_executable(${CMAKE_PROJECT_NAME} main.cpp)
 #aggiunta della libreria con i file sorgente settati a riga 9
 add_library(${CMAKE_PROJECT_NAME}_lib ${SOURCE_FILES})

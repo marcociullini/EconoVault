@@ -9,7 +9,7 @@
 #include "BankAccount.h"
 
 BankAccount::BankAccount() : operations(), paymentCards(), balance(0.00f) {
-    // Generazione IBAN fittizio
+    // Generates fake IBAN
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> dis(0, 9);
@@ -30,16 +30,13 @@ BankAccount::BankAccount() : operations(), paymentCards(), balance(0.00f) {
 
 BankAccount &BankAccount::operator=(const BankAccount &right) {
     if (this != &right) {
-        // Copia IBAN e balance
         IBAN = right.IBAN;
         balance = right.balance;
 
-        // Copia le transazioni
         for (const auto &transaction: right.operations) {
             operations.push_back(std::make_shared<Operation>(*transaction));
         }
 
-        // Copia le carte di pagamento
         for (const auto &card: right.paymentCards) {
             paymentCards.push_back(std::make_shared<PaymentCard>(*card));
         }
@@ -48,87 +45,46 @@ BankAccount &BankAccount::operator=(const BankAccount &right) {
 }
 
 void BankAccount::addTransaction(const std::shared_ptr<Operation> &transaction) {
-    if ((transaction->getType() == OperationType::Deposit) & (transaction->getAmount() > 0)) {
+    if ((transaction->getType() == OperationType::Deposit) && (transaction->getAmount() > 0)) {
         balance += transaction->getAmount();
-    } else if ((transaction->getType() == OperationType::Withdrawal) & (transaction->getAmount() > 0)) {
+    } else if ((transaction->getType() == OperationType::Withdrawal) && (transaction->getAmount() > 0)) {
         balance -= transaction->getAmount();
-    } else if ((transaction->getType() == OperationType::Transfer) & (transaction->getAmount() > 0)) {
+    } else if ((transaction->getType() == OperationType::Transfer) && (transaction->getAmount() > 0)) {
         balance -= transaction->getAmount();
     }
     operations.push_back(transaction);
 }
 
-bool BankAccount::sameAmount(float a, float b) const {
+bool BankAccount::sameAmount(float a, float b) {
     if (std::fabs(a - b) < 1e-5) {
         return true;
     } else
         return false;
 }
 
-/*/auto BankAccount::searchOperations(float amount) const {
-    int sameOperation = 0;
-    for (const auto transaction: operations) {
-        if (transaction->getAmount() == amount) {
-            sameOperation++;
-        }
-        int n ++;
-    }
-    if (sameOperation == 0) {
-        return false;
-    } else if (sameOperation == 1) {
-        for (const auto transaction: operations) {
-            if (transaction->getAmount() == amount) {
-                return Operation a (transaction);
-            }
-        }
-    } else {
-        std::vector<Operation> sameOperations;
-        for (const auto transaction: operations) {
-            const Operation transactionOutput = &transaction;
-            if (transaction->getAmount() == amount) {
-                sameOperations.push_back(transactionOutput);
-            }
-        }
-        return sameOperations;
-    }
-}*/
-
 std::vector<std::shared_ptr<Operation>> BankAccount::searchOperationAmount(float amount) const {
     std::vector<std::shared_ptr<Operation>> result;
-    bool sameElements = false;
 
     for (const auto &operation: operations) {
         if (sameAmount(operation->getAmount(), amount)) {
             result.push_back(operation);
-            sameElements = true;
         }
     }
-    if (sameElements) {
-        return result;
-    }
-    //return false;
     return result;
 }
 
-std::vector<std::shared_ptr<Operation>> BankAccount::searchOperationDate() const {
-    Time time;
-    std::string userDate = time.getUserInputDate();
-    std::string formattedUserDate = time.formatDate(userDate);
+std::vector<std::shared_ptr<Operation>> BankAccount::searchOperationDate(std::string date) const {
+
+    std::string formattedUserDate = Time::formatDate(date);
     std::vector<std::shared_ptr<Operation>> result;
-    bool sameDate = false;
 
     for (const auto &transaction: operations) {
         std::string transactionDate = transaction->printDateTime();
-        std::string formattedTransactionDate = time.formatDate(transactionDate);
+        std::string formattedTransactionDate = Time::formatDate(transactionDate);
         if (formattedTransactionDate == formattedUserDate) {
             result.push_back(transaction);
-            sameDate = true;
         }
     }
-    if (sameDate) {
-        return result;
-    }
-    //return false;
     return result;
 }
 
@@ -153,7 +109,7 @@ void BankAccount::save(std::string file) const {
         std::cout << "Dati salvati su file: " << file << std::endl;
     } else {
         std::cerr << "Impossibile aprire il file " << file << " per la scrittura."
-                  << std::endl; //FIXME trasformare in errore
+                  << std::endl;
     }
 }
 

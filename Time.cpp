@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <sstream>
 #include "Time.h"
+#include "Date.h"
 
 std::string Time::printCurrentTime() const {
     time_t rawTime;
@@ -16,7 +17,7 @@ std::string Time::printCurrentTime() const {
     return asctime(rawTimeA);
 }
 
-std::string Time::getUserInputDate() {
+void Time::getUserInputDate() {
     int year, month, day;
     std::cout << "Enter year: ";
     std::cin >> year;
@@ -25,24 +26,23 @@ std::string Time::getUserInputDate() {
     std::cout << "Enter day (1-31): ";
     std::cin >> day;
 
-    struct tm userTime = {0};
-    userTime.tm_year = year - 1900; // tm_year is years since 1900
-    userTime.tm_mon = month - 1; // tm_mon is 0-based
-    userTime.tm_mday = day;
+    Date date(day, month, year);
 
-    // Convert tm struct to time_t
-    time_t rawTime = mktime(&userTime);
+    std::tm userDate = {};
+    userDate.tm_year = date.getYear() - 1900; // tm_year is years since 1900
+    userDate.tm_mon = date.getMonth() - 1; // tm_mon is 0-based
+    userDate.tm_mday = date.getDay();
 
-    struct tm *rawTimeA;
-    rawTimeA = localtime(&rawTime);
-    return asctime(rawTimeA);
+    std::time_t t = std::mktime(&userDate);
+    std::tm *userTime = std::localtime(&t);
+    this->time = asctime(userTime);
 }
 
-void Time::printTime() const{
+void Time::printTime() const {
     std::cout << time << std::endl;
 }
 
-void Time::setTime(){
+void Time::setTime() {
     time_t rawTime;
     std::time(&rawTime);
     struct tm *rawTimeA;
@@ -50,11 +50,16 @@ void Time::setTime(){
     this->time = asctime(rawTimeA);
 }
 
-std::string Time::formatDate(const std::string& date) {
+std::string Time::formatDate(const std::string &date) {
+    // Creation of a string stream named iss to handle the date fields
     std::istringstream iss(date);
+    // Creation of an empty structure tm in order to manipulate the data fields
     std::tm tm = {};
+    // initializing tm with all the values of date
     iss >> std::get_time(&tm, "%a %b %d %H:%M:%S %Y");
+    // Creation of a string stream named oss to output the formatted data fields
     std::ostringstream oss;
+    // Selecting the data fields for the output
     oss << std::put_time(&tm, "%Y-%m-%d");
     return oss.str();
 }
