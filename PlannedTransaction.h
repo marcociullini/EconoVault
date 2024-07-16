@@ -21,6 +21,7 @@ public:
         return nextExecutionDate;
     }
 
+
     Frequency getFrequency() const {
         return frequency;
     }
