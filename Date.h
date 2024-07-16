@@ -6,44 +6,37 @@
 #define ECONOVAULT_DATE_H
 
 
+#include <string>
+
 class Date {
 public:
+
+    Date();
+
     Date(int day, int month, int year);
 
-    Date() : day(1), month(1), year(2000) {}
+    std::string getDateTime() const{
+        return dateTime;
+    };
 
-    int getDay() const;
+    static bool isLeapYear(int year);
 
-    int getMonth() const;
+    static int getMaxDays(int month, int year);
 
-    int getYear() const;
+    static bool checkFutureDate(const Date& date);
 
-    void setDay(int day);
+    static std::string formatDate(Date date);
 
-    void setMonth(int month);
+    Date addDays(int days) const;
 
-    void setYear(int year);
+    Date addMonths(int months) const;
 
-    bool operator==(const Date &right) const;
+    Date addYears(int years) const;
 
-    void printDate() const;
-
-    int getDaysOfMonth(int month, int year) const;
-
-    bool isLeap(int year) const;
-
-    bool validDate(int day, int month, int year);
-
-    bool validDay(int day, int month, int year) const;
-
-    bool validMonth(int month);
-
-    bool validYear(int year);
+    bool operator<=(const Date &other) const;
 
 private:
-    int day;
-    int month;
-    int year;
+    std::string dateTime;
 };
 
 #endif //ECONOVAULT_DATE_H

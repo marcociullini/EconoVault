@@ -5,10 +5,11 @@
 #include <fstream>
 #include <sstream>
 #include <random>
+#include <algorithm>
 
 #include "BankAccount.h"
 
-BankAccount::BankAccount() : operations(), paymentCards(), balance(0.00f) {
+BankAccount::BankAccount() : operations(), plannedTransactions(), paymentCards(), balance(0.00f) {
     // Generates fake IBAN
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -28,59 +29,98 @@ BankAccount::BankAccount() : operations(), paymentCards(), balance(0.00f) {
 
 }
 
-BankAccount &BankAccount::operator=(const BankAccount &right) {
-    if (this != &right) {
-        IBAN = right.IBAN;
-        balance = right.balance;
-
-        for (const auto &transaction: right.operations) {
-            operations.push_back(std::make_shared<Operation>(*transaction));
-        }
-
-        for (const auto &card: right.paymentCards) {
-            paymentCards.push_back(std::make_shared<PaymentCard>(*card));
-        }
-    }
-    return *this;
-}
-
 void BankAccount::addTransaction(const std::shared_ptr<Operation> &transaction) {
-    if ((transaction->getType() == OperationType::Deposit) && (transaction->getAmount() > 0)) {
-        balance += transaction->getAmount();
-    } else if ((transaction->getType() == OperationType::Withdrawal) && (transaction->getAmount() > 0)) {
-        balance -= transaction->getAmount();
-    } else if ((transaction->getType() == OperationType::Transfer) && (transaction->getAmount() > 0)) {
-        balance -= transaction->getAmount();
+    double newBalance = balance;
+    if (transaction->getType() == OperationType::Deposit) {
+        newBalance += transaction->getAmount();
+    } else if (transaction->getType() == OperationType::Withdrawal ||
+               transaction->getType() == OperationType::Transfer) {
+        newBalance -= transaction->getAmount();
     }
-    operations.push_back(transaction);
+
+    if (newBalance < 0) {
+        throw std::runtime_error("The transaction exceeds the available balance!");
+    } else {
+        balance = newBalance;
+        operations.push_back(transaction);
+    }
 }
 
-bool BankAccount::sameAmount(float a, float b) {
-    if (std::fabs(a - b) < 1e-5) {
-        return true;
-    } else
-        return false;
+void BankAccount::addPlannedTransaction(const std::shared_ptr<PlannedTransaction>& transaction) {
+    plannedTransactions.push_back(transaction);
 }
 
-std::vector<std::shared_ptr<Operation>> BankAccount::searchOperationAmount(float amount) const {
+void BankAccount::cancelOperations(const std::vector<std::shared_ptr<Operation>> &transactionsToCancel) {
+    double newBalance = balance;
+    for (const auto &transaction: transactionsToCancel) {
+        auto it = std::find(operations.begin(), operations.end(), transaction);
+        if (it != operations.end()) {
+            if (transaction->getType() == OperationType::Deposit) {
+                newBalance -= transaction->getAmount();
+            } else {
+                newBalance += transaction->getAmount();
+            }
+        }
+    }
+
+    if (newBalance < 0) {
+        throw std::runtime_error("The cancellation exceeds the available balance!");
+    }
+
+    balance = newBalance;
+    for (const auto &transaction: transactionsToCancel) {
+        auto it = std::find(operations.begin(), operations.end(), transaction);
+        if (it != operations.end()) {
+            operations.erase(it);
+        }
+    }
+}
+
+void
+BankAccount::removePlannedTransaction(const std::vector<std::shared_ptr<PlannedTransaction>> transactionsToCancel) {
+    for (const auto &transaction: transactionsToCancel) {
+        auto it = std::find(plannedTransactions.begin(), plannedTransactions.end(), transaction);
+        if (it != plannedTransactions.end()) {
+            plannedTransactions.erase(it);
+        }
+    }
+}
+
+std::vector<std::shared_ptr<Operation>> BankAccount::searchOperationAmount(double amount) const {
+    if(amount <= 0){
+        throw std::invalid_argument("Amount not valid!");
+    }
     std::vector<std::shared_ptr<Operation>> result;
 
     for (const auto &operation: operations) {
-        if (sameAmount(operation->getAmount(), amount)) {
+        if (std::fabs(operation->getAmount() - amount) < 1e-5) {
             result.push_back(operation);
         }
     }
     return result;
 }
 
-std::vector<std::shared_ptr<Operation>> BankAccount::searchOperationDate(std::string date) const {
+std::vector<std::shared_ptr<PlannedTransaction>> BankAccount::searchPlannedDate(double amount) const {
+    if(amount <= 0){
+       throw std::invalid_argument("Amount not valid!");
+    }
+    std::vector<std::shared_ptr<PlannedTransaction>> result;
 
-    std::string formattedUserDate = Time::formatDate(date);
+    for (const auto &transaction: plannedTransactions) {
+        if (std::fabs(transaction->getAmount() - amount) < 1e-5) {
+            result.push_back(transaction);
+        }
+    }
+    return result;
+}
+
+std::vector<std::shared_ptr<Operation>> BankAccount::searchOperationDate(Date date) const {
     std::vector<std::shared_ptr<Operation>> result;
+    std::string formattedUserDate = date.formatDate(date);
 
     for (const auto &transaction: operations) {
-        std::string transactionDate = transaction->printDateTime();
-        std::string formattedTransactionDate = Time::formatDate(transactionDate);
+        Date transactionDate = transaction->getDateTime();
+        std::string formattedTransactionDate = transactionDate.formatDate(transactionDate);
         if (formattedTransactionDate == formattedUserDate) {
             result.push_back(transaction);
         }
@@ -88,9 +128,109 @@ std::vector<std::shared_ptr<Operation>> BankAccount::searchOperationDate(std::st
     return result;
 }
 
+std::vector<std::shared_ptr<PlannedTransaction>> BankAccount::searchPlannedDate(Date date) const {
+    std::vector<std::shared_ptr<PlannedTransaction>> result;
+    std::string formattedUserDate = date.formatDate(date);
+
+    for (const auto &transaction: plannedTransactions) {
+        Date transactionDate = transaction->getDateTime();
+        std::string formattedTransactionDate = transactionDate.formatDate(transactionDate);
+        if (formattedTransactionDate == formattedUserDate) {
+            result.push_back(transaction);
+        }
+    }
+    return result;
+}
+
+std::vector<std::shared_ptr<PlannedTransaction>> BankAccount::searchPlannedNextExecutionDate(Date date) const {
+    std::vector<std::shared_ptr<PlannedTransaction>> result;
+    std::string formattedUserDate = date.formatDate(date);
+
+    for (const auto &transaction: plannedTransactions) {
+        Date transactionNextExecutionDate = transaction->getNextExecutionDate();
+        std::string formattedNextExecutionDate = transactionNextExecutionDate.formatDate(transactionNextExecutionDate);
+        if (formattedNextExecutionDate == formattedUserDate) {
+            result.push_back(transaction);
+        }
+    }
+    return result;
+}
+
+std::vector<std::shared_ptr<Operation>> BankAccount::searchOperationType(OperationType type) const {
+    std::vector<std::shared_ptr<Operation>> result;
+    for (const auto &operation: operations) {
+        if (operation->getType() == type) {
+            result.push_back(operation);
+        }
+    }
+    return result;
+}
+
+void BankAccount::executePlannedTransactions() {
+    Date currentDate; // Current date
+    auto it = plannedTransactions.begin();
+    while (it != plannedTransactions.end()) {
+        if ((*it)->getNextExecutionDate() <= currentDate) {
+            try {
+                addTransaction(std::make_shared<Operation>((*it)->getAmount(), (*it)->getType()));
+
+                if ((*it)->getFrequency() == Frequency::One) {
+                    // Remove the transaction after execution if it's one-time
+                    it = plannedTransactions.erase(it);
+                } else {
+                    // Update the next execution date and move to the next transaction
+                    (*it)->updateNextExecutionDate();
+                    ++it;
+                }
+            } catch (const std::exception &e) {
+                throw std::runtime_error(std::string("Failed to execute planned transaction: ") + e.what());
+            }
+        } else {
+            ++it;
+        }
+    }
+    std::cout << "Planned transactions executed." << std::endl;
+}
+
+void BankAccount::addCard(std::string name) {
+    auto newCard = std::make_shared<PaymentCard>(name);
+    paymentCards.push_back(newCard);
+}
+
+void BankAccount::printOperations(const std::vector<std::shared_ptr<Operation>> &operations) const {
+    std::cout << "Transactions: " << std::endl;
+    for (const auto operation: operations) {
+        std::cout << operation->printOperationString() << std::endl;
+    }
+}
+
+void BankAccount::printPlannedTransactions(const std::vector<std::shared_ptr<PlannedTransaction>> & plannedTransactions) const {
+    std::cout << "Planned Transactions: " << std::endl;
+    for (const auto plannedOperation: plannedTransactions) {
+        std::cout << plannedOperation->printOperationString() << std::endl;
+    }
+}
+
+void BankAccount::printCards() const {
+    std::cout << "Payment Cards: " << std::endl;
+    for (const auto paymentCard: paymentCards) {
+        std::cout << paymentCard->printCardString() << std::endl;
+    }
+}
+
+std::string BankAccount::printIban() const {
+    return IBAN;
+}
+
+std::string BankAccount::printBalance() const {
+    std::ostringstream balanceStream;
+    balanceStream << balance;
+    return balanceStream.str();
+}
+
 void BankAccount::save(std::string file) const {
+    // Generates the output file with the BankAccount information
     std::ofstream outputFile(file); // Opens in write mode and gives a name to the file
-    std::stringstream tString; // Creates a string output stream
 
     if (outputFile.is_open()) {
         for (const auto transaction: operations) {
@@ -106,37 +246,9 @@ void BankAccount::save(std::string file) const {
 
         outputFile.close();
 
-        std::cout << "Dati salvati su file: " << file << std::endl;
+        std::cout << "Data saved in: " << file << std::endl;
     } else {
-        std::cerr << "Impossibile aprire il file " << file << " per la scrittura."
+        std::cerr << "Impossible to open " << file << " to save."
                   << std::endl;
     }
-}
-
-void BankAccount::addCard(std::string name) {
-    auto newCard = std::make_shared<PaymentCard>(name);
-    paymentCards.push_back(newCard);
-}
-
-void BankAccount::printOperations(std::vector<std::shared_ptr<Operation>> operations) const {
-    std::cout << "IBAN: " << IBAN << std::endl;
-    std::cout << "Transactions: " << std::endl;
-    for (const auto operation: operations) {
-        std::cout << operation->printOperationString() << std::endl;
-    }
-}
-
-void BankAccount::printCards() const {
-    std::cout << "Payment Cards: " << std::endl;
-    for (const auto paymentCard: paymentCards) {
-        std::cout << paymentCard->printCardString() << std::endl;
-    }
-}
-
-void BankAccount::printIban() const {
-    std::cout << IBAN;
-}
-
-void BankAccount::printBalance() const {
-    std::cout << balance;
 }

@@ -11,6 +11,7 @@
 #include <list>
 #include "Operation.h"
 #include "PaymentCard.h"
+#include "PlannedTransaction.h"
 
 class BankAccount {
 public:
@@ -18,10 +19,12 @@ public:
 
     ~BankAccount() = default;
 
-    BankAccount &operator=(const BankAccount &right);
-
     const std::vector<std::shared_ptr<Operation>> &getOperations() const {
         return operations;
+    }
+
+    const std::vector<std::shared_ptr<PlannedTransaction>> &getPlannedTransactions() const {
+        return plannedTransactions;
     }
 
     const std::list<std::shared_ptr<PaymentCard>> &getPaymentCards() const {
@@ -32,36 +35,52 @@ public:
         return IBAN;
     }
 
-    float getBalance() const {
+    double getBalance() const {
         return balance;
     }
 
     void addTransaction(const std::shared_ptr<Operation> &transaction);
 
-    bool static sameAmount(float a, float b);
+    void addPlannedTransaction(const std::shared_ptr<PlannedTransaction>& transaction);
 
-    std::vector<std::shared_ptr<Operation>> searchOperationAmount(float amount) const;
+    void cancelOperations(const std::vector<std::shared_ptr<Operation>> &operationsToCancel);
 
-    std::vector<std::shared_ptr<Operation>> searchOperationDate(std::string date) const;
+    void removePlannedTransaction(const std::vector<std::shared_ptr<PlannedTransaction>> plannedTransactions);
 
-    void save(std::string file) const;
+    std::vector<std::shared_ptr<Operation>> searchOperationAmount(double amount) const;
+
+    std::vector<std::shared_ptr<PlannedTransaction>> searchPlannedDate(double amount) const;
+
+    std::vector<std::shared_ptr<Operation>> searchOperationDate(Date date) const;
+
+    std::vector<std::shared_ptr<PlannedTransaction>> searchPlannedDate(Date date) const;
+
+    std::vector<std::shared_ptr<PlannedTransaction>> searchPlannedNextExecutionDate(Date date) const;
+
+    std::vector<std::shared_ptr<Operation>> searchOperationType(OperationType type) const;
+
+    void executePlannedTransactions();
 
     void addCard(std::string name);
 
-    void printOperations(std::vector<std::shared_ptr<Operation>> operations) const;
+    void printOperations(const std::vector<std::shared_ptr<Operation>> &operations) const;
+
+    void printPlannedTransactions(const std::vector<std::shared_ptr<PlannedTransaction>> &operations) const;
 
     void printCards() const;
 
-    void printIban() const;
+    std::string printIban() const;
 
-    void printBalance() const;
+    std::string printBalance() const;
 
+    void save(std::string file) const;
 
 private:
-    std::vector<std::shared_ptr<Operation>> operations; //shared_ptr altrimenti escono fuori di scopo nello switch e non riesco mai a salvarle nel main
+    std::vector<std::shared_ptr<Operation>> operations; //shared_ptr because search functions uses the same elements of this vector
+    std::vector<std::shared_ptr<PlannedTransaction>> plannedTransactions;
     std::list<std::shared_ptr<PaymentCard>> paymentCards;
     std::string IBAN;
-    float balance;
+    double balance;
 
 };
 

@@ -8,7 +8,9 @@
 #include "PaymentCard.h"
 
 
-PaymentCard::PaymentCard(std::string name) : cardName(name) {
+PaymentCard::PaymentCard(const std::string& name) {
+    // Generation of fake card data
+    this->cardName = name;
     // Initialization of random number generators
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -18,42 +20,17 @@ PaymentCard::PaymentCard(std::string name) : cardName(name) {
     std::stringstream cardIDStream;
     cardIDStream << cardIDModuleGenerator(gen) << " " << cardIDModuleGenerator(gen) << " " << cardIDModuleGenerator(gen)
                  << " " << cardIDModuleGenerator(gen);
-    cardNumber = cardIDStream.str();
+    this->cardNumber = cardIDStream.str();
 
     // Generation of the cvv (3 digits)
     std::uniform_int_distribution<int> cvvGenerator(100, 999);
-    cvv = cvvGenerator(gen);
+    this->cvv = cvvGenerator(gen);
 
     // Generation of the pin (5 digits)
     std::uniform_int_distribution<int> pinGenerator(10000, 99999);
     pin = pinGenerator(gen);
 
-    maximum = 1000;
-}
-
-PaymentCard &PaymentCard::operator=(const PaymentCard &other) {
-    if (this != &other) {
-        cardNumber = other.cardNumber;
-        cvv = other.cvv;
-        pin = other.pin;
-    }
-    return *this;
-}
-
-void PaymentCard::printCvv() const {
-    std::cout << cvv << std::endl;
-}
-
-void PaymentCard::printPin() const {
-    std::cout << pin << std::endl;
-}
-
-void PaymentCard::printCardID() const {
-    std::cout << cardNumber << std::endl;
-}
-
-void PaymentCard::printCard() const {
-    std::cout << "Card number: " << cardNumber << ", cvv: " << cvv << ", pin: " << pin << std::endl;
+    this->maximum = 1000;
 }
 
 std::string PaymentCard::printCardString() const {

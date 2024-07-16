@@ -5,23 +5,22 @@
 #include <sstream>
 #include "Operation.h"
 
-Operation::Operation(float a, OperationType type) : amount(a), type(type) {
-
-    dateTime.setTime();
-
+Operation::Operation(double a, OperationType type) : type(type), date(Date()) {
+    if(a <= 0)
+        throw std::out_of_range("Amount not valid!");
+    else
+        amount = a;
 }
-
-Operation::Operation(const Operation &other) : amount(other.amount) , dateTime(other.dateTime) , type(other.type) {}
 
 void Operation::printOperation() const {
     std::cout
-            << printOperationType() << ", amount:" << amount << ", time info:" << dateTime.getTime() << std::endl;
+            << printOperationType() << ", amount:" << amount << ", time info:" << date.getDateTime() << std::endl;
 }
 
 std::string Operation::printOperationString() const {
     std::stringstream transaction;
     transaction << printOperationType() << ", amount:" << amount
-                << ", time info:" << dateTime.getTime();
+                << ", time info:" << date.getDateTime();
     return transaction.str();
 }
 
@@ -33,8 +32,6 @@ std::string Operation::printOperationType() const {
             return "Withdrawal";
         case OperationType::Transfer:
             return "Transfer";
-        default:
-            return "Unknown";
     }
 }
 
@@ -47,14 +44,5 @@ std::string Operation::printOperationTypes() {
 }
 
 std::string Operation::printDateTime() const {
-    return dateTime.getTime();
-}
-
-Operation &Operation::operator=(const Operation &right) {
-    if (this != &right) {
-        amount = right.amount;
-        dateTime = right.dateTime;
-        type = right.type;
-    }
-    return *this;
+    return date.getDateTime();
 }

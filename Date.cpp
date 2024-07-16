@@ -4,87 +4,86 @@
 
 #include "Date.h"
 #include <iostream>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+
+Date::Date() {
+    time_t rawTime;
+    std::time(&rawTime);
+    struct tm *rawTimeA;
+    rawTimeA = localtime(&rawTime);
+    dateTime = asctime(rawTimeA);
+}
 
 Date::Date(int day, int month, int year) {
-    if (!validDate(day, month, year))
-        throw std::out_of_range("Date not valid!"); //controllare prima di assegnare
-    else{
-        this->day = day;
-        this->month = month;
-        this->year = year;
-    }
+    if ((year >= 2000 && year <= 2100)) {
+        if (month > 0 && month < 13) {
+
+            int maxDays = getMaxDays(month, year);
+
+            if (day > 0 && day <= maxDays) {
+                std::time_t now = std::time(0);
+                std::tm *currentDate = std::localtime(&now);
+
+                std::tm givenDate = {};
+                givenDate.tm_year = year - 1900;
+                givenDate.tm_mon = month - 1;
+                givenDate.tm_mday = day;
+                givenDate.tm_hour = 23;
+                givenDate.tm_min = 59;
+                givenDate.tm_sec = 59;
+
+                std::time_t givenTime = std::mktime(&givenDate);
+                std::time_t currentTime = std::mktime(currentDate);
+
+                if (givenTime < currentTime) {
+                    throw std::out_of_range("Date already passed!");
+                } else {
+                    // creation of the date string
+                    std::tm userDate = {};
+                    userDate.tm_year = year - 1900; // tm_year is years since 1900
+                    userDate.tm_mon = month - 1; // tm_mon is 0-based
+                    userDate.tm_mday = day;
+
+                    std::time_t t = std::mktime(&userDate);
+                    std::tm *userTime = std::localtime(&t);
+                    dateTime = asctime(userTime);
+                }
+            } else
+                throw std::out_of_range("Date not valid!");
+        } else
+            throw std::out_of_range("Month not valid!");
+    } else
+        throw std::out_of_range("Year not valid!");
 }
 
-int Date::getDay() const {
-    return day;
-}
-
-int Date::getMonth() const {
-    return month;
-}
-
-int Date::getYear() const {
-    return year;
-}
-
-void Date::setDay(int day) {
-    if (validDay(day, this->month, this->year))
-        Date::day = day;
-    //else
-    //throw std::out_of_range("Day not valid!");
-
-}
-
-void Date::setMonth(int month) {
-    if (validMonth(month)) {
-        if (validDay(this->day, month,
-                     this->year)) //controllo che effettivamente pure il giorno è valido per il nuovo mese
-            Date::month = month;
-        //else
-        //throw std::out_of_range("Day not valid for the new month!");
-    } //else
-    //throw std::out_of_range("Month not valid!");
-
-}
-
-void Date::setYear(int year) {
-    if (validYear(year)) {
-        if (validDay(this->day, month,
-                     this->year)) //controllo che effettivamente pure il giorno è valido per il nuovo mese
-            Date::year = year;
-        //else
-        //throw std::out_of_range("Day not valid for the new year!");
-    } //else
-    //throw std::out_of_range("Year out of range!");
-}
-
-bool Date::isLeap(int year) const {
+bool Date::isLeapYear(int year) {
+    bool isLeap;
     if (year % 4 == 0) {
         if (year % 100 == 0) {
             if (year % 400 == 0)
-                return true;
+                isLeap = true;
             else
-                return false;
+                isLeap = false;
         } else
-            return true;
-    }
-    return false;
+            isLeap = true;
+    } else
+        isLeap = false;
+    return isLeap;
 }
 
-void Date::printDate() const {
-    std::cout << day << "/" << month << "/" << year << std::endl;
-    //std::cout << Date::getDay() <<"/"<< Date::getMonth() <<"/"<< Date::getYear() << std::endl;
-}
-
-
-int Date::getDaysOfMonth(int month, int year) const {
+int Date::getMaxDays(int month, int year) {
+    int maxDays;
     switch (month) {
         case 2:
             //February
-            if (isLeap(year))
-                return 29;
+            if (isLeapYear(year))
+                maxDays = 29;
+
             else
-                return 28;
+                maxDays = 28;
+            break;
         case 4:
             // April
         case 6:
@@ -93,42 +92,93 @@ int Date::getDaysOfMonth(int month, int year) const {
             // September
         case 11:
             // November
-            return 30;
+            maxDays = 30;
+            break;
         default:
             // The other months have 31 days
-            return 31;
+            maxDays = 31;
     }
+    return maxDays;
 }
 
+bool Date::checkFutureDate(const Date &date) {
+    Date currentDate;  // Crea una data con la data e ora corrente
 
-bool Date::validDate(int day, int month, int year) {
-    if (validDay(day, month, year) && validMonth(month) && validYear(year))
+    std::tm timeinfo1 = {};
+    std::istringstream ss1(date.dateTime);
+    ss1 >> std::get_time(&timeinfo1, "%a %b %d %H:%M:%S %Y");
+
+    std::tm timeinfo2 = {};
+    std::istringstream ss2(currentDate.dateTime);
+    ss2 >> std::get_time(&timeinfo2, "%a %b %d %H:%M:%S %Y");
+
+    std::time_t time1 = std::mktime(&timeinfo1);
+    std::time_t time2 = std::mktime(&timeinfo2);
+
+    if (time1 <= time2) {
+        throw std::out_of_range("Date not valid, already passed!");
+    } else
         return true;
-    else
-        return false;
 }
 
-bool Date::operator==(const Date &right) const {
-    if (this->day == right.day && this->month == right.month && this->year == right.year)
-        return true;
-    return false;
+std::string Date::formatDate(Date date) {
+    // Creation of a string stream named iss to handle the date fields
+    std::istringstream iss(date.getDateTime());
+    // Creation of an empty structure tm in order to manipulate the data fields
+    std::tm tm = {};
+    // initializing tm with all the values of date
+    iss >> std::get_time(&tm, "%a %b %d %H:%M:%S %Y");
+    // Creation of a string stream named oss to output the formatted data fields
+    std::ostringstream oss;
+    // Selecting the data fields for the output
+    oss << std::put_time(&tm, "%Y-%m-%d");
+    return oss.str();
 }
 
-bool Date::validDay(int day, int month, int year) const {
-    int maxDays = getDaysOfMonth(month, year);
-    if (day > 0 && day <= maxDays)
-        return true;
-    return false;
+Date Date::addDays(int days) const {
+    struct tm timeinfo = {};
+    std::istringstream ss(dateTime);
+    ss >> std::get_time(&timeinfo, "%a %b %d %H:%M:%S %Y");
+
+    timeinfo.tm_mday += days;
+    std::mktime(&timeinfo);  // Normalizza la data
+
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%a %b %d %H:%M:%S %Y", &timeinfo);
+    return Date(timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
 }
 
-bool Date::validMonth(int month) {
-    if (month > 0 && month < 13)
-        return true;
-    return false;
+Date Date::addMonths(int months) const {
+    struct tm timeinfo = {};
+    std::istringstream ss(dateTime);
+    ss >> std::get_time(&timeinfo, "%a %b %d %H:%M:%S %Y");
+
+    timeinfo.tm_mon += months;
+    std::mktime(&timeinfo);  // Normalizza la data
+
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%a %b %d %H:%M:%S %Y", &timeinfo);
+    return Date(timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
 }
 
-bool Date::validYear(int year) {
-    if (year >= 2000 && year <= 2100)
-        return true;
-    return false;
+Date Date::addYears(int years) const {
+    struct tm timeinfo = {};
+    std::istringstream ss(dateTime);
+    ss >> std::get_time(&timeinfo, "%a %b %d %H:%M:%S %Y");
+
+    timeinfo.tm_year += years;
+    std::mktime(&timeinfo);  // Normalizza la data
+
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%a %b %d %H:%M:%S %Y", &timeinfo);
+    return Date(timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
+}
+
+bool Date::operator<=(const Date &other) const {
+    std::tm time1 = {}, time2 = {};
+    std::istringstream ss1(this->dateTime);
+    std::istringstream ss2(other.dateTime);
+    ss1 >> std::get_time(&time1, "%a %b %d %H:%M:%S %Y");
+    ss2 >> std::get_time(&time2, "%a %b %d %H:%M:%S %Y");
+    return std::mktime(&time1) <= std::mktime(&time2);
 }

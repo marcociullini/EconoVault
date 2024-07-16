@@ -8,15 +8,32 @@
 
 #include "Operation.h"
 
+enum class Frequency {
+    One, Daily, Weekly, Monthly, Yearly
+};
+
 class PlannedTransaction : public Operation {
 public:
-    explicit PlannedTransaction(float amount, OperationType type);
+    PlannedTransaction(float amount, OperationType type, Date nextExecutionDate, Frequency frequency)
+            : Operation(amount, type), nextExecutionDate(nextExecutionDate), frequency(frequency) {}
 
-    virtual PlannedTransaction &operator=(const PlannedTransaction &right);
+    Date getNextExecutionDate() const {
+        return nextExecutionDate;
+    }
+
+    Frequency getFrequency() const {
+        return frequency;
+    }
+
+    std::string printFrequency() const;
+
+    std::string printOperationString() const override;
+
+    void updateNextExecutionDate();
 
 private:
-    int date;
-
+    Date nextExecutionDate;
+    Frequency frequency;
 };
 
 

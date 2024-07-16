@@ -9,7 +9,7 @@
 #include <string>
 #include <ctime>
 #include <iostream>
-#include "Time.h"
+#include "Date.h"
 
 enum class OperationType {
     Deposit, Withdrawal, Transfer
@@ -17,17 +17,13 @@ enum class OperationType {
 
 class Operation {
 public:
-    explicit Operation(float a, OperationType type);
-
-    Operation(const Operation &other);
+    explicit Operation(double a, OperationType type);
 
     ~Operation() = default;
 
-    virtual Operation &operator=(const Operation &right);
-
     virtual void printOperation() const;
 
-    std::string printOperationString() const;
+    virtual std::string printOperationString() const;
 
     std::string printOperationType() const;
 
@@ -35,12 +31,12 @@ public:
 
     std::string printDateTime() const;
 
-    float getAmount() const {
+    double getAmount() const {
         return amount;
     }
 
-    Time getDateTime() const {
-        return dateTime;
+    Date getDateTime() const {
+        return date;
     }
 
     OperationType getType() const {
@@ -48,8 +44,8 @@ public:
     }
 
 protected:
-    float amount;
-    Time dateTime;
+    double amount;
+    Date date;
     OperationType type;
 };
 
