@@ -10,6 +10,8 @@
 
 class Time {
 public:
+    Time();
+
     std::string printCurrentTime() const;
 
     void printTime() const;

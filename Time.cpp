@@ -6,6 +6,14 @@
 #include <iostream>
 #include "Time.h"
 
+Time::Time() {
+    time_t rawTime;
+    std::time(&rawTime);
+    struct tm *rawTimeA;
+    rawTimeA = localtime(&rawTime);
+    this->time = asctime(rawTimeA);
+}
+
 std::string Time::printCurrentTime() const {
     time_t rawTime;
     std::time(&rawTime);
