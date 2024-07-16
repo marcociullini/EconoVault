@@ -444,6 +444,7 @@ int main() {
                                             std::cin >> typeChoice;
                                             if (typeChoice <= 0 || typeChoice >= 4)
                                                 std::cerr << "Invalid choice!" << std::endl;
+
                                         } while (typeChoice <= 0 || typeChoice >= 4);
 
                                         OperationType searchType;
